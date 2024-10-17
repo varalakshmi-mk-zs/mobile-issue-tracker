@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issues Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            width: 300px;
+            height: 300px;
+            position: relative;
+            margin: 20px;
+        }
+        .charts-wrapper {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        canvas {
+            width: 300px !important;
+            height: 300px !important;
+        }
+        .custom-tooltip {
+            display: none;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bug Tracking Dashboard</h1>
+    <div class="charts-wrapper">
+        <div class="chart-container">
+            <h2>Android Issues</h2>
+            <canvas id="androidChart"></canvas>
+            <div id="android-tooltip" class="custom-tooltip"></div>
+        </div>
+        <div class="chart-container">
+            <h2>iOS Issues</h2>
+            <canvas id="iosChart"></canvas>
+            <div id="ios-tooltip" class="custom-tooltip"></div>
+        </div>
+    </div>
+
+    <script>
+        const androidCtx = document.getElementById('androidChart').getContext('2d');
+        const iosCtx = document.getElementById('iosChart').getContext('2d');
+
+        // Debugging to check if canvas contexts are loaded
+        console.log(androidCtx);
+        console.log(iosCtx);
+
+        const androidData = {
+            labels: ['Last 7 Days', 'Last 1 Month', 'More Than 1 Month'],
+            datasets: [{
+                label: '# of Issues',
+                data: [0, 2, 6],
+                backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)'],
+                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
+                borderWidth: 1
+            }]
+        };
+
+        const iosData = {
+            labels: ['Last 7 Days', 'Last 1 Month', 'More Than 1 Month'],
+            datasets: [{
+                label: '# of Issues',
+                data: [2, 4, 4],
+                backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)'],
+                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],
+                borderWidth: 1
+            }]
+        };
+
+        // Debugging data to ensure it's not empty
+        console.log("Android Data:", androidData);
+        console.log("iOS Data:", iosData);
+
+        function createChart(ctx, data, tooltipData, tooltipElement) {
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            enabled: false // Disable default tooltip
+                        },
+                    },
+                    onHover: function(event, chartElement) {
+                        const points = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+                        const tooltip = document.getElementById(tooltipElement);
+                        if (points.length) {
+                            const index = points[0].index;
+                            const issues = tooltipData[index];
+                            tooltip.innerHTML = '<strong>Total Issues:</strong> ' + issues.total +
+                                '<br><br>' + issues.details.map(issue =>
+                                'ID: ' + issue.id + '<br>Title: ' + issue.title +
+                                '<br>Created At: ' + issue.createdAt +
+                                '<br>Created By: ' + issue.createdBy
+                            ).join('<br><br>');
+                            tooltip.style.display = 'block';
+                            tooltip.style.left = event.offsetX + 10 + 'px';
+                            tooltip.style.top = event.offsetY + 10 + 'px';
+                        } else {
+                            tooltip.style.display = 'none';
+                        }
+                    }
+                }
+            });
+            return chart;
+        }
+
+        createChart(androidCtx, androidData, [
+            { total: 0, details: ] }, // Last 7 Days issues
+            { total: 2, details: [{ id: 1931, title: 'BUG- Tamimi_Android_V6.5.3', createdAt: 'Tue Oct 08 17:18:59 IST 2024', createdBy: 'AnushkaRawatZ' },{ id: 1890, title: '[Bug] Cluster_Brimbary_V6.4.9', createdAt: 'Fri Sep 20 13:22:03 IST 2024', createdBy: 'varalakshmi-mk-zs' }] }, // Last 1 Month issues
+            { total: 6, details: [{ id: 1819, title: '[Bug] Cluster_PDP_PLP', createdAt: 'Fri Aug 30 16:26:04 IST 2024', createdBy: 'varalakshmi-mk-zs' },{ id: 1810, title: '[Bug] Cluster_Cart_and_Checkout', createdAt: 'Thu Aug 29 17:17:03 IST 2024', createdBy: 'varalakshmi-mk-zs' },{ id: 1681, title: 'Buy Now Functionality issue', createdAt: 'Mon Jul 22 12:59:24 IST 2024', createdBy: 'choudharyshiv' },{ id: 1529, title: 'Android: Push Notifications Image Display Issue with few devices', createdAt: 'Thu Mar 28 14:51:29 IST 2024', createdBy: 'Irfanbanavasi' },{ id: 1506, title: 'Clean up of order details - all themes', createdAt: 'Wed Mar 20 15:53:10 IST 2024', createdBy: 'meherish' },{ id: 1179, title: 'Fix item deleting issue in checkout screen blaze ', createdAt: 'Thu Jan 25 11:16:11 IST 2024', createdBy: 'Swati-priya' }] }  // More Than 1 Month issues
+        ], 'android-tooltip');
+
+        createChart(iosCtx, iosData, [
+            { total: 2, details: [{ id: 1463, title: 'Scarlet: iOS - The SMS payment link contains special character', createdAt: 'Tue Oct 15 18:47:58 IST 2024', createdBy: 'Irfanbanavasi' },{ id: 1460, title: 'Getz: banner showing and Cannot Decode Json error', createdAt: 'Tue Oct 15 09:52:18 IST 2024', createdBy: 'Lingrajnm' }] }, // Last 7 Days issues
+            { total: 4, details: [{ id: 1459, title: 'BUG-Vijetha-V4.2.4', createdAt: 'Wed Oct 09 14:21:57 IST 2024', createdBy: 'NagesharaoShridharKunthe' },{ id: 1448, title: 'BUG-Tamimi iOS Migration ', createdAt: 'Thu Sep 26 17:43:49 IST 2024', createdBy: 'NagesharaoShridharKunthe' },{ id: 1447, title: 'BUG- Issue in placing order with unstable internet in Tamimi iOS', createdAt: 'Thu Sep 26 17:16:35 IST 2024', createdBy: 'NagesharaoShridharKunthe' },{ id: 1439, title: 'Scarlet: IOS BUG : Reorder is not working', createdAt: 'Tue Sep 24 11:56:31 IST 2024', createdBy: 'Irfanbanavasi' }] }, // Last 1 Month issues
+            { total: 4, details: [{ id: 1415, title: '[Bug] Cluster_IOS_EKAM_Build_9 (V 1.0.0)', createdAt: 'Tue Sep 03 14:24:50 IST 2024', createdBy: 'varalakshmi-mk-zs' },{ id: 1410, title: '[Bug] Cluster_EKAM_IOS_Issues', createdAt: 'Mon Sep 02 18:27:02 IST 2024', createdBy: 'varalakshmi-mk-zs' },{ id: 1289, title: 'Theme Scarlet Issues', createdAt: 'Fri Jun 28 11:56:07 IST 2024', createdBy: 'manashzop' },{ id: 1248, title: 'Bugs Identified While Testing Scarlet Mobile Application for iOS', createdAt: 'Mon Jun 03 15:24:08 IST 2024', createdBy: 'Ashif0538' }] }  // More Than 1 Month issues
+        ], 'ios-tooltip');
+    </script>
+</body>
+</html>
